@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tripdremo-auth-state.v1.schema.json",
+  "title": "TripdremoAuthState",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "authenticated": {
+      "type": "boolean"
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["none", "guest", "user"]
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "device_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "plans_used": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "plans_limit": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "api_base_url": {
+      "type": "string",
+      "format": "uri"
+    }
+  },
+  "required": ["authenticated", "kind", "device_id", "api_base_url"],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "authenticated": { "const": true }
+        },
+        "required": ["authenticated"]
+      },
+      "then": {
+        "properties": {
+          "kind": { "enum": ["guest", "user"] }
+        }
+      },
+      "else": {
+        "properties": {
+          "kind": { "const": "none" }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Tripdremo Cloud Planner"
+  short_description: "Generate a trip with Tripdremo backend AI"
+  default_prompt: "Use $tripdremo-cloud to generate this itinerary with Tripdremo backend AI."
+policy:
+  allow_implicit_invocation: false

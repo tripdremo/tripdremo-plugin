@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tripdremo-plan-result.v1.schema.json",
+  "title": "TripdremoPlanResult",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "share_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "share_url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://[^/]+/(en|lt|de|pl)/plans/[^/?#]+/?$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "destination": {
+      "type": "string"
+    },
+    "dates": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": "string", "format": "date" }
+      },
+      "required": ["start", "end"]
+    },
+    "day_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "generating", "ready", "failed"]
+    },
+    "owner_kind": {
+      "type": "string",
+      "enum": ["guest", "user"]
+    },
+    "days": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "index": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string" },
+          "stop_count": { "type": "integer", "minimum": 0 },
+          "drive_summary": { "type": "string" }
+        },
+        "required": ["index", "title", "stop_count", "drive_summary"]
+      }
+    },
+    "trip_payload": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": ["share_hash", "share_url", "title", "subtitle", "destination", "dates", "day_count", "status", "owner_kind", "days"]
+}

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "tripdremo": {
+      "command": "node",
+      "args": ["./mcp/bin/tripdremo-mcp.mjs"],
+      "cwd": "."
+    }
+  }
+}

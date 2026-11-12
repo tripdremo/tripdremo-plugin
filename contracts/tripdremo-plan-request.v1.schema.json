@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tripdremo-plan-request.v1.schema.json",
+  "title": "TripdremoPlanRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "origin": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "destination": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "adults": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12,
+      "default": 2
+    },
+    "children": {
+      "type": "array",
+      "maxItems": 12,
+      "default": [],
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "age": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 17
+          }
+        },
+        "required": ["age"]
+      }
+    },
+    "style": {
+      "type": "string",
+      "enum": ["relaxed", "balanced", "active", "camper", "luxury"],
+      "default": "balanced"
+    },
+    "budget": {
+      "type": "string",
+      "enum": ["value", "comfortable", "premium"],
+      "default": "comfortable"
+    },
+    "constraints": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": true
+    },
+    "wait_seconds": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 120,
+      "default": 0
+    }
+  },
+  "required": ["prompt", "start_date", "end_date"]
+}

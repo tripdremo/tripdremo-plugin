@@ -1,0 +1,10 @@
+{
+  "name": "tripdremo",
+  "version": "0.1.2+codex.20260817190305",
+  "description": "Plan real trips with Tripdremo and get a shareable itinerary link, straight from the CLI.",
+  "author": {
+    "name": "Tripdremo",
+    "url": "https://tripdremo.com"
+  },
+  "homepage": "https://tripdremo.com"
+}

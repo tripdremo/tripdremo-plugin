@@ -1,0 +1,9 @@
+# DO NOT EDIT: generated from commands/tripdremo.md by scripts/build-plugin.mjs.
+description = "Plan trips and manage Tripdremo sessions."
+prompt = """
+# Tripdremo
+
+Use the `tripdremo` skill to handle this request:
+
+{{args}}
+"""

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tripdremo-pending-submission.v1.schema.json",
+  "title": "TripdremoPendingSubmission",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "submission_id": { "type": "string", "format": "uuid" },
+    "payload_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "identity_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["submission_id", "payload_hash", "identity_hash", "created_at"]
+}

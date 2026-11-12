@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "tripdremo-local",
+  "description": "Local marketplace for the Tripdremo agent plugin.",
+  "owner": {
+    "name": "Tripdremo",
+    "url": "https://tripdremo.com"
+  },
+  "plugins": [
+    {
+      "name": "tripdremo",
+      "source": "./plugins/tripdremo-claude",
+      "description": "Plan real trips and return shareable Tripdremo itineraries.",
+      "category": "productivity"
+    }
+  ]
+}

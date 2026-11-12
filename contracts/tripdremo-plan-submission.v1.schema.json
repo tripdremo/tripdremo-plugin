@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tripdremo-plan-submission.v1.schema.json",
+  "title": "TripdremoPlanSubmissionResult",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": { "const": "ready" },
+        "plan": { "$ref": "tripdremo-plan-result.v1.schema.json" }
+      },
+      "required": ["status", "plan"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": { "const": "needs_revision" },
+        "schema_version": { "const": "trip-plan.v3" },
+        "issues": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "code": { "type": "string", "minLength": 1 },
+              "message": { "type": "string", "minLength": 1 },
+              "suggestion": { "type": "string" }
+            },
+            "required": ["path", "code", "message"]
+          }
+        },
+        "plan": { "type": "object" }
+      },
+      "required": ["status", "schema_version", "issues", "plan"]
+    }
+  ]
+}

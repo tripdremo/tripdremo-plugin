@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tripdremo-plan-schema-result.v1.schema.json",
+  "title": "TripdremoPlanSchemaResult",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "const": "trip-plan.v3" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "schema": { "type": "object" }
+  },
+  "required": ["name", "version", "sha256", "schema"]
+}

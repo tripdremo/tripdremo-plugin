@@ -62,7 +62,7 @@ async function fixture() {
       ? send(422, { status: "needs_revision", schema_version: "trip-plan.v3", plan: body.plan, issues: [{ code: "missing_title", path: "$.title", message: "Add a title" }] })
       : send(201, rawPlan);
     if (hit.path === `/api/v1/mcp/submissions/${submissionId}/`) return send(200, { submission_id: submissionId, status: "ready", result: rawPlan });
-    if (hit.path === "/api/v1/mcp/submissions/?limit=10") return send(200, { operations: [{ submission_id: submissionId, status: "ready", result: rawPlan }] });
+    if (hit.path === "/api/v1/mcp/submissions/?limit=20") return send(200, { operations: [{ submission_id: submissionId, status: "ready", result: rawPlan }] });
     if (hit.path === "/api/v1/mcp/plans/saved123/") return send(200, { trip: rawPlan });
     if (hit.path.startsWith("/api/v1/mcp/plans/?")) return send(200, { count: 2, next: "http://private-backend/api/v1/mcp/plans/?page=2", previous: null, results: [rawPlan] });
     return send(404, { code: "not_found" });

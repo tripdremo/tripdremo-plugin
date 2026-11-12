@@ -30,7 +30,7 @@ Use browser sign-in for passwords and consent. Never request a password, one-tim
 A `submission_id` belongs to one exact payload. Reuse it only for unchanged request and plan JSON.
 
 - `needs_revision`: repair the returned plan using structured issue paths and codes. If status recovery omits the plan, repair the retained authored plan. Prepare a new UUID for that revised payload, then submit. Stop after two repair-and-resubmit attempts and show the remaining issues.
-- Timeout, retryable backend failure, disconnect or unknown result: call `tripdremo_submission_status` with the UUID. If it was lost, omit the argument to list the ten most recent account operations and identify the original request from its dates and summary. Resolve that operation before preparing another UUID.
+- Timeout, retryable backend failure, disconnect or unknown result: call `tripdremo_submission_status` with the UUID. If it was lost, omit the argument to list up to 20 account operations, with unresolved operations (including expired unknown outcomes) before recent completed operations, and identify the original request from its dates and summary. Resolve that operation before preparing another UUID.
 - `prepared` or `unknown`: retry the exact retained payload with the same UUID while it is unexpired. Never reconstruct changed content for the old UUID. If the payload is unavailable, report the recoverable operation and stop the write.
 - `processing`: perform bounded status checks, then return the UUID and pending state if work remains. Do not claim completion or create another operation.
 - Recovered `ready`: use the returned result and share URL. Recovered `needs_revision`: apply the revision branch.
@@ -44,6 +44,6 @@ Keep ordinary network recovery bounded to three checks/retries per user turn. A 
 - `whoami` or connection checks: `tripdremo_auth_status`.
 - `plans`: `tripdremo_list_plans`; follow returned `next_page` only as needed.
 - `open <share_hash>`: `tripdremo_get_plan`, with `include_payload: false` unless the user asks for full JSON.
-- Recovery requests: `tripdremo_submission_status` with the saved UUID, or list recent operations.
+- Recovery requests: `tripdremo_submission_status` with the saved UUID, or list up to 20 operations, unresolved first then recent completed operations.
 
 Treat every other nonempty argument as a planning request. For empty arguments, ask for the trip destination and dates. Use only titles, UUIDs, hashes and URLs returned by the tools.

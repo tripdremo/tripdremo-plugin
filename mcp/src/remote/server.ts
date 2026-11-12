@@ -12,7 +12,7 @@ import type { RemoteBackend } from "./backend.js";
 export const REMOTE_INSTRUCTIONS = `Use Tripdremo with the AI model in this conversation. A connection request or copied setup prompt requires native connector setup in this same host, browser OAuth sign-in, and successful tripdremo_auth_status and tripdremo_get_plan_schema calls before planning. If a setup step cannot be completed here, preserve the original request and name the exact native action still needed; a generic travel draft does not complete a connection request.
 Use the live schema to author the complete Trip Plan v3 JSON in this conversation. Retain the original structured request and authored plan until the operation resolves. Saving stores the itinerary and creates a shareable link. An explicit request to save or return a Tripdremo link, including the copied setup prompt's save request, already authorizes submission: disclose sharing and proceed without asking again. Obtain authorization only if saving was not requested.
 Call tripdremo_prepare_submission with {request}. Keep its returned submission_id, then call tripdremo_submit_plan with {submission_id, schema_version: "trip-plan.v3", request, plan}. A submission_id identifies exactly one payload: retry unchanged content with the same ID. After a structured needs_revision result, repair the returned plan (or the retained plan if recovery omits it) using its issues, call tripdremo_prepare_submission again, and submit the revised payload with the new ID. Allow at most two repair attempts.
-On timeout or unknown outcome, call tripdremo_submission_status with {submission_id} before preparing another operation; omit the ID to list recent operations if it was lost. Recover or retry an unexpired operation with its exact retained payload and original ID. Poll processing outcomes with bounded checks; return the pending ID if unresolved. Only report a saved itinerary when the backend returns ready and a real plan.share_url.
+On timeout or unknown outcome, call tripdremo_submission_status with {submission_id} before preparing another operation; omit the ID to list up to 20 account operations, unresolved first (including expired unknown outcomes), then recent completed operations. Recover or retry an unexpired operation with its exact retained payload and original ID. Poll processing outcomes with bounded checks; return the pending ID if unresolved. Only report a saved itinerary when the backend returns ready and a real plan.share_url.
 Use tripdremo_get_plan and tripdremo_list_plans for account retrieval. Browser OAuth manages connection; local guest/login/logout tools and backend AI are unavailable in this hosted workflow. Never request passwords or tokens in chat.`;
 
 const empty = z.object({}).strict();
@@ -23,7 +23,7 @@ const submit = z.object({
   request: planRequestSchema,
   plan: z.record(z.string(), z.json()),
 }).strict();
-const status = z.object({ submission_id: z.uuid().optional().describe("Recover this operation. Omit to list the 10 most recent account submissions after reconnecting.") }).strict();
+const status = z.object({ submission_id: z.uuid().optional().describe("Recover this operation. Omit to list up to 20 account submissions: unresolved first, including expired unknown outcomes, then recent completed submissions.") }).strict();
 const get = z.object({
   share_hash: z.string().regex(/^[A-Za-z0-9_-]+$/).max(128),
   include_payload: z.boolean().default(false),
@@ -39,7 +39,7 @@ const tools = [
   definition("get_plan_schema", "Fetch the current Trip Plan v3 JSON schema; the current conversation AI authors the plan.", empty, true),
   definition("prepare_submission", "Reserve a durable submission UUID for the original structured request. Recover unknown operations before reserving another ID.", prepare, false, false),
   definition("submit_plan", "Validate, enrich and save an AI-authored plan. Replays require the same submission_id and identical payload. Structured needs_revision results require a new prepared ID after repair.", submit, false),
-  definition("submission_status", "Recover an operation by UUID or list recent account submissions. Resolve unknown outcomes before creating another operation.", status, true),
+  definition("submission_status", "Recover an operation by UUID or list up to 20 account submissions, unresolved first then recent completed submissions. Resolve unknown outcomes before creating another operation.", status, true),
   definition("get_plan", "Read a plan available to the connected account by share hash.", get, true),
   definition("list_plans", "List connected-account plans with page and limit pagination.", list, true),
 ];
@@ -91,7 +91,7 @@ export function createRemoteServer(backend: RemoteBackend): Server {
         }
         case "tripdremo_submission_status": {
           const parsed = status.parse(args);
-          value = operationResult(await backend.request("GET", parsed.submission_id ? `/mcp/submissions/${parsed.submission_id}/` : "/mcp/submissions/?limit=10")); break;
+          value = operationResult(await backend.request("GET", parsed.submission_id ? `/mcp/submissions/${parsed.submission_id}/` : "/mcp/submissions/?limit=20")); break;
         }
         case "tripdremo_get_plan": {
           const parsed = get.parse(args);

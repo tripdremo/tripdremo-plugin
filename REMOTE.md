@@ -66,7 +66,7 @@ Each HTTP request gets a fresh MCP server and delegated backend client. No MCP s
 
 The seven tools are authentication status, schema, prepare submission, submit plan, submission status, get plan and list plans. The current conversation AI authors the plan. Remote tools do not offer guest provisioning, local login/logout or cloud itinerary generation.
 
-Prepare reserves a backend UUID before submission. Retrying the same payload reuses that UUID. A structured revision uses a newly prepared UUID. Recover an ambiguous result by UUID, or list the ten latest account operations after reconnecting. The backend owns durable receipts, leases, payload conflicts and account isolation. Hosted MCP maps ready responses to the same compact plan projection as stdio and preserves the status/revision recovery metadata.
+Prepare reserves a backend UUID before submission. Retrying the same payload reuses that UUID. A structured revision uses a newly prepared UUID. Recover an ambiguous result by UUID, or list up to 20 account operations after reconnecting: unresolved operations, including expired unknown outcomes, come before recent completed operations. The backend owns durable receipts, leases, payload conflicts and account isolation. Hosted MCP maps ready responses to the same compact plan projection as stdio and preserves the status/revision recovery metadata.
 
 ## Acceptance sequence
 

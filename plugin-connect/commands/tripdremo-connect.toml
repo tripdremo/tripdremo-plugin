@@ -1,0 +1,7 @@
+# Generated from tripdremo-connect.md by build-plugin.mjs.
+description = "Connect your AI and save a Tripdremo itinerary."
+prompt = """
+Use the `tripdremo-connect` skill. Verify the hosted tools and authenticated account before planning, then complete this request:
+
+{{args}}
+"""

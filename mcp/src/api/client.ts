@@ -1,3 +1,4 @@
+import { VERSION } from "../version.js";
 import { loadConfig, type TripdremoConfig } from "../config.js";
 import { TripdremoError } from "../errors.js";
 import { getToken } from "../auth/store.js";
@@ -30,7 +31,7 @@ export class ApiClient {
   private readonly tokenProvider: () => string | undefined;
   private readonly userAgent: string;
 
-  constructor(versionOrOptions: string | ApiClientOptions = "0.1.0") {
+  constructor(versionOrOptions: string | ApiClientOptions = VERSION) {
     const options = typeof versionOrOptions === "string" ? { version: versionOrOptions } : versionOrOptions;
     this.config = options.config ?? loadConfig();
     this.fetchImpl = options.fetch ?? globalThis.fetch;
@@ -38,7 +39,7 @@ export class ApiClient {
     this.random = options.random ?? Math.random;
     this.now = options.now ?? Date.now;
     this.tokenProvider = options.tokenProvider ?? getToken;
-    this.userAgent = `tripdremo-mcp/${options.version ?? "0.1.0"} (+https://tripdremo.com)`;
+    this.userAgent = `tripdremo-mcp/${options.version ?? VERSION} (+https://tripdremo.com)`;
   }
 
   async request<T>(method: HttpMethod, path: string, body?: unknown): Promise<T> {

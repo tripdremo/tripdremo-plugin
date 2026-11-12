@@ -1,5 +1,7 @@
 # Tripdremo plugin distribution
 
+Version 0.2.0 adds the separate `tripdremo-connect` remote profile. Its generated Git catalog entries are local release artifacts until pushed; production OAuth and real-host acceptance remain pending. See [REMOTE.md](REMOTE.md).
+
 ## Current channels
 
 | Channel | Status | Install source |
@@ -14,11 +16,13 @@ The repository marketplace is public distribution: users can add it directly fro
 
 ## Release checklist
 
-1. Update both manifests to the same version:
+1. Keep root/MCP package versions and all local/remote manifests at the same version:
    - `plugin/.codex-plugin/plugin.json`
    - `plugin/.claude-plugin/plugin.json`
+   - `plugin-connect/.codex-plugin/plugin.json`
+   - `plugin-connect/.claude-plugin/plugin.json`
 2. Run `npm run build`, `npm test`, and `npm run lint`.
-3. Run `claude plugin validate --strict .` and `claude plugin validate --strict plugin/dist/marketplace/plugins/tripdremo-claude`.
+3. Run `claude plugin validate --strict .` and validate both generated `tripdremo-claude` and `tripdremo-connect-claude` packages.
 4. With the local Trips stack running, execute `npm run smoke:local -- /absolute/path/to/plan-submission.json`.
 5. Commit the canonical sources and generated marketplace artifacts together, then push the public repository.
 6. Test a clean install from `tripdremo/tripdremo-plugin` in both hosts.

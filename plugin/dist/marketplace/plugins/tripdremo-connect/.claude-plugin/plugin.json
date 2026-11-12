@@ -1,0 +1,10 @@
+{
+  "name": "tripdremo-connect",
+  "version": "0.2.0",
+  "description": "Plan with your current AI and save Tripdremo itineraries through browser-authenticated hosted MCP.",
+  "author": {
+    "name": "Tripdremo",
+    "url": "https://tripdremo.com"
+  },
+  "homepage": "https://tripdremo.com/en/connect-ai"
+}

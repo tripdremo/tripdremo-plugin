@@ -1,0 +1,9 @@
+.git
+node_modules
+mcp/dist
+plugin
+skills
+docs
+.omx
+*.log
+.env*

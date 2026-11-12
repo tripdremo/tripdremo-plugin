@@ -31,7 +31,7 @@ test("foundation client sends user agent and injected token through one fetch wr
   }).request<{ ok: boolean }>("get", "/health/");
   const headers = new Headers(observed?.headers);
   assert.deepEqual(result, { ok: true });
-  assert.equal(headers.get("User-Agent"), "tripdremo-mcp/0.1.0 (+https://tripdremo.com)");
+  assert.equal(headers.get("User-Agent"), "tripdremo-mcp/0.2.0 (+https://tripdremo.com)");
   assert.equal(headers.get("Authorization"), `Bearer ${secretToken}`);
 });
 
@@ -46,7 +46,7 @@ test("foundation client can make a fully anonymous public request", async () => 
   assert.deepEqual(result, { ok: true });
   assert.equal(headers.has("Authorization"), false);
   assert.equal(headers.has("X-Travel-User"), false);
-  assert.equal(headers.get("User-Agent"), "tripdremo-mcp/0.1.0 (+https://tripdremo.com)");
+  assert.equal(headers.get("User-Agent"), "tripdremo-mcp/0.2.0 (+https://tripdremo.com)");
 });
 
 test("foundation client confines an explicit tombstone token to its one request", async () => {

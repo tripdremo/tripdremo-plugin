@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
+import { access, cp, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -37,6 +37,7 @@ try {
       packagedPlugin,
       { recursive: true },
     );
+    assert.deepEqual((await readdir(path.join(packagedPlugin, "skills"))).sort(), ["tripdremo", "tripdremo-cloud"]);
     const manifest = JSON.parse(await readFile(path.join(packagedPlugin, ".mcp.json"), "utf8"));
     const server = manifest.mcpServers.tripdremo;
     assert.equal(server.command, host.command);
@@ -65,8 +66,28 @@ try {
     }
     assert.equal(Buffer.concat(stderrChunks).toString("utf8"), "");
   }
+  const rootVersion = JSON.parse(await readFile(path.join(repositoryRoot, "package.json"), "utf8")).version;
+  for (const packageName of ["tripdremo-connect", "tripdremo-connect-claude"]) {
+    const packagedPlugin = path.join(isolatedRoot, packageName);
+    await cp(path.join(repositoryRoot, "plugin", "dist", "marketplace", "plugins", packageName), packagedPlugin, { recursive: true });
+    const manifest = JSON.parse(await readFile(path.join(packagedPlugin, ".mcp.json"), "utf8"));
+    assert.deepEqual(manifest.mcpServers, { "tripdremo-connect": { type: "http", url: "https://mcp.tripdremo.com/mcp" } });
+    assert.deepEqual(await readdir(path.join(packagedPlugin, "skills")), ["tripdremo-connect"]);
+    await assert.rejects(access(path.join(packagedPlugin, "mcp")), { code: "ENOENT" });
+    await assert.rejects(access(path.join(packagedPlugin, "node_modules")), { code: "ENOENT" });
+    for (const kind of [".codex-plugin", ".claude-plugin"]) {
+      const plugin = JSON.parse(await readFile(path.join(packagedPlugin, kind, "plugin.json"), "utf8"));
+      assert.equal(plugin.name, "tripdremo-connect"); assert.equal(plugin.version, rootVersion);
+    }
+    const skill = await readFile(path.join(packagedPlugin, "skills", "tripdremo-connect", "SKILL.md"), "utf8");
+    for (const [, target] of skill.matchAll(/\]\((references\/[^)]+)\)/g)) await access(path.join(packagedPlugin, "skills", "tripdremo-connect", target));
+  }
+  const { build } = await import("esbuild");
+  const graph = await build({ entryPoints: [path.join(repositoryRoot, "mcp", "dist", "http.js")], bundle: true, platform: "node", format: "esm", write: false, metafile: true });
+  const inputs = Object.keys(graph.metafile.inputs);
+  assert.equal(inputs.some((file) => /mcp\/dist\/(auth\/|api\/client)/.test(file)), false, "Hosted runtime must not import the local credential/client modules");
 } finally {
   await rm(isolatedRoot, { recursive: true, force: true });
 }
 
-process.stdout.write("Isolated Codex and Claude packaged MCP handshakes passed.\n");
+process.stdout.write("Isolated local Codex/Claude handshakes, remote profile manifests and hosted credential boundaries passed.\n");

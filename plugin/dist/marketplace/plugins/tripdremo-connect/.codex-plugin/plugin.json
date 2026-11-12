@@ -1,0 +1,40 @@
+{
+  "name": "tripdremo-connect",
+  "version": "0.2.0",
+  "description": "Plan with your current AI and save Tripdremo itineraries through browser-authenticated hosted MCP.",
+  "author": {
+    "name": "Tripdremo",
+    "url": "https://tripdremo.com"
+  },
+  "homepage": "https://tripdremo.com/en/connect-ai",
+  "license": "Proprietary",
+  "keywords": [
+    "travel",
+    "trip",
+    "itinerary",
+    "planning",
+    "tripdremo"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Tripdremo Connect",
+    "shortDescription": "Connect your AI and save a Tripdremo itinerary.",
+    "longDescription": "Author trips with the AI in this conversation and save them to your Tripdremo account through the hosted connector.",
+    "developerName": "Tripdremo",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://tripdremo.com/en/connect-ai",
+    "defaultPrompt": [
+      "Connect Tripdremo and save a five-day Dolomites itinerary for two adults",
+      "Show my Tripdremo plans",
+      "Recover my pending Tripdremo submission"
+    ],
+    "brandColor": "#111D3A",
+    "composerIcon": "./assets/app-icon.svg",
+    "logo": "./assets/app-icon.svg"
+  }
+}

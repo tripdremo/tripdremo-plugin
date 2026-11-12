@@ -7,11 +7,14 @@ const pluginRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".
 const repositoryRoot = path.resolve(pluginRoot, "..");
 const mcpSource = path.join(repositoryRoot, "mcp");
 const skillsSource = path.join(repositoryRoot, "skills");
+const remotePluginRoot = path.join(repositoryRoot, "plugin-connect");
 const bundledMcp = path.join(pluginRoot, "mcp");
 const bundledSkills = path.join(pluginRoot, "skills");
 const marketplaceRoot = path.join(pluginRoot, "dist", "marketplace");
 const marketplacePlugin = path.join(marketplaceRoot, "plugins", "tripdremo");
 const claudeMarketplacePlugin = path.join(marketplaceRoot, "plugins", "tripdremo-claude");
+const remoteMarketplacePlugin = path.join(marketplaceRoot, "plugins", "tripdremo-connect");
+const remoteClaudeMarketplacePlugin = path.join(marketplaceRoot, "plugins", "tripdremo-connect-claude");
 const publicCodexMarketplace = path.join(repositoryRoot, ".agents", "plugins", "marketplace.json");
 const publicClaudeMarketplace = path.join(repositoryRoot, ".claude-plugin", "marketplace.json");
 
@@ -53,8 +56,17 @@ async function validateManifests() {
       throw new Error(`${label} name must be tripdremo`);
     }
   }
-  if (codex.version !== claude.version) {
-    throw new Error("Codex and Claude manifest versions must match");
+  const remoteCodex = await readJson(path.join(remotePluginRoot, ".codex-plugin", "plugin.json"));
+  const remoteClaude = await readJson(path.join(remotePluginRoot, ".claude-plugin", "plugin.json"));
+  const mcpPackage = await readJson(path.join(mcpSource, "package.json"));
+  const rootPackage = await readJson(path.join(repositoryRoot, "package.json"));
+  if (![claude, remoteCodex, remoteClaude, mcpPackage, rootPackage].every((manifest) => manifest.version === codex.version)) {
+    throw new Error("All plugin and package versions must match");
+  }
+  const remoteMcp = await readJson(path.join(remotePluginRoot, ".mcp.json"));
+  if (remoteCodex.name !== "tripdremo-connect" || remoteClaude.name !== "tripdremo-connect"
+      || JSON.stringify(remoteMcp.mcpServers) !== JSON.stringify({ "tripdremo-connect": { type: "http", url: "https://mcp.tripdremo.com/mcp" } })) {
+    throw new Error("Remote profile must use only the canonical hosted HTTP endpoint");
   }
 
   if (codex.interface?.brandColor !== "#111D3A") {
@@ -170,7 +182,7 @@ async function bundleMcp() {
 
 async function copySkills() {
   const skillDirectories = (await readdir(skillsSource, { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory())
+    .filter((entry) => entry.isDirectory() && ["tripdremo", "tripdremo-cloud"].includes(entry.name))
     .map((entry) => entry.name)
     .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
 
@@ -246,6 +258,20 @@ async function writeClaudeMcpManifest(pluginPath) {
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 }
 
+async function writeRemotePlugins() {
+  const markdown = await readFile(path.join(remotePluginRoot, "commands", "tripdremo-connect.md"), "utf8");
+  const prompt = commandBody(markdown).replace("$ARGUMENTS", "{{args}}").trimEnd();
+  await writeFile(path.join(remotePluginRoot, "commands", "tripdremo-connect.toml"),
+    '# Generated from tripdremo-connect.md by build-plugin.mjs.\ndescription = "Connect your AI and save a Tripdremo itinerary."\nprompt = """\n' + prompt + '\n"""\n');
+  for (const target of [remoteMarketplacePlugin, remoteClaudeMarketplacePlugin]) {
+    await cp(remotePluginRoot, target, { recursive: true });
+    await cp(path.join(skillsSource, "tripdremo-connect"), path.join(target, "skills", "tripdremo-connect"), { recursive: true });
+  }
+  const claudeMcp = await readJson(path.join(remoteClaudeMarketplacePlugin, ".mcp.json"));
+  delete claudeMcp.$schema;
+  await writeFile(path.join(remoteClaudeMarketplacePlugin, ".mcp.json"), `${JSON.stringify(claudeMcp, null, 2)}\n`);
+}
+
 async function writeMarketplaces() {
   await rm(marketplaceRoot, { recursive: true, force: true });
   await mkdir(path.join(marketplaceRoot, ".agents", "plugins"), { recursive: true });
@@ -277,6 +303,7 @@ async function writeMarketplaces() {
 
   await assertCodexCloudSkill(path.join(marketplacePlugin, "skills"), "Codex marketplace");
   await assertClaudeCloudSkill(path.join(claudeMarketplacePlugin, "skills"));
+  await writeRemotePlugins();
 
   const codexMarketplace = {
     name: "tripdremo-local",
@@ -304,6 +331,8 @@ async function writeMarketplaces() {
       },
     ],
   };
+  codexMarketplace.plugins.push({ name: "tripdremo-connect", source: { source: "local", path: "./plugins/tripdremo-connect" }, policy: { installation: "AVAILABLE", authentication: "ON_INSTALL" }, category: "Productivity" });
+  claudeMarketplace.plugins.push({ name: "tripdremo-connect", source: "./plugins/tripdremo-connect-claude", description: "Connect your AI and save Tripdremo account itineraries.", category: "productivity" });
   await writeFile(
     path.join(marketplaceRoot, ".agents", "plugins", "marketplace.json"),
     `${JSON.stringify(codexMarketplace, null, 2)}\n`,
@@ -342,6 +371,8 @@ async function writeMarketplaces() {
       },
     ],
   };
+  publicCodex.plugins.push({ name: "tripdremo-connect", source: { source: "local", path: "./plugin/dist/marketplace/plugins/tripdremo-connect" }, policy: { installation: "AVAILABLE", authentication: "ON_INSTALL" }, category: "Productivity" });
+  publicClaude.plugins.push({ name: "tripdremo-connect", source: "./plugin/dist/marketplace/plugins/tripdremo-connect-claude", description: "Connect your AI and save Tripdremo account itineraries.", category: "productivity" });
   await mkdir(path.dirname(publicCodexMarketplace), { recursive: true });
   await mkdir(path.dirname(publicClaudeMarketplace), { recursive: true });
   await writeFile(publicCodexMarketplace, `${JSON.stringify(publicCodex, null, 2)}\n`, "utf8");

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="TripDremo">
+  <rect x="32" y="32" width="960" height="960" rx="208" fill="#111D3A"/>
+  <svg x="132" y="186.5" width="760" height="651" viewBox="0 0 70 60">
+    <path fill="#FFFFFF" d="M18 6 H30 C45 6 56 16.7 56 30 C56 43.3 45 54 30 54 H23 L27 45 H30 C39.7 45 47 38.6 47 30 C47 21.4 39.7 15 30 15 H18 Z"/>
+    <path fill="#FFFFFF" d="M18 6 H27 V23.5 C27 26.7 29.2 27.9 33.7 29.5 C39.2 31.5 41.2 35.4 38.1 40.2 C35.6 44.1 28.5 46.2 26.2 54 H14.8 C16.1 46.9 19.5 42.6 25.9 38.7 C30.1 36.1 31 34.5 26.2 32.7 C20.8 30.7 18 28.2 18 24.1 Z"/>
+  </svg>
+</svg>

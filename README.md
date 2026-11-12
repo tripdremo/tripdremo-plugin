@@ -1,11 +1,14 @@
 # Tripdremo agent surface
 
-This repository packages Tripdremo for Codex and Claude Code:
+Version 0.2.0 includes two separate profiles: `tripdremo` keeps the bundled local stdio/guest workflow; `tripdremo-connect` uses the hosted, browser-authenticated account connector. The hosted service and remote profile are prepared for release; real ChatGPT/Claude account acceptance remains pending. See [Hosted setup and release checks](REMOTE.md) for installation, OAuth, deployment and recovery.
 
-- `mcp/` provides the TypeScript MCP server over stdio.
+This repository packages Tripdremo for local CLI hosts and hosted MCP connections:
+
+- `mcp/` provides the local stdio server and the account-only hosted Streamable HTTP service.
 - `skills/tripdremo/` provides the default local-first planner: the current Codex or Claude host model authors the complete itinerary from Tripdremo's online Trip Plan v3 schema.
 - `skills/tripdremo-cloud/` preserves explicit opt-in backend-AI generation for future use with weak or old host models.
-- `plugin/` packages the MCP server, skills, and commands for both hosts.
+- `skills/tripdremo-connect/` provides setup, hosted planning and submission recovery for the AI in the current conversation.
+- `plugin/` builds both Git catalogs; `plugin-connect/` defines the separate remote profile.
 
 The plugin's main logo is the canonical Tripdremo wordmark PNG. Its small square composer icon remains a separate brand-derived asset because the horizontal wordmark does not fit that slot.
 
@@ -17,7 +20,9 @@ The preserved cloud path is a separate explicit skill: Codex `/tripdremo-cloud`,
 
 The two modes never fall back to each other automatically. A future capability check may explicitly recommend the cloud skill for a weak or old host model, but this version does not guess model quality or silently spend backend AI.
 
-### Local-first submission contract
+The hosted `tripdremo-connect` flow starts with native connector setup, browser OAuth and successful `tripdremo_auth_status` and `tripdremo_get_plan_schema` calls in the same AI host. That AI authors the JSON, calls `tripdremo_prepare_submission` with `{request}`, and passes the returned `submission_id` to `tripdremo_submit_plan` with the exact request and plan. Recover an unknown result through `tripdremo_submission_status` before starting another operation. Hosted tools use account OAuth and explicit prepared IDs; the local profile below keeps its existing guest and hidden-ID behavior.
+
+### Local stdio submission contract
 
 - `tripdremo_get_plan_schema` is a public read. `tripdremo_submit_plan` requires the authenticated CLI identity; the MCP server silently provisions the guest identity when needed.
 - The public MCP input contains `schema_version`, the original structured `request`, and the complete `plan`. The MCP server adds a private UUID v4 `submission_id` to the backend envelope; users and host models do not supply it.
@@ -28,7 +33,7 @@ The two modes never fall back to each other automatically. A future capability c
 - Host-authored `sources[].url` and place `map_url` values must be empty or absolute HTTPS URLs on public hosts. Raw schema, location-cap, and unsafe-URL mistakes are rejected before the durable submission ledger and enrichment budgets; they still count toward the 120-requests-per-identity/hour throttle.
 - Only a READY plan is persisted and counts toward the one successful guest plan or the separate authenticated local-first success quota. An account also has a separate durable budget of 100 accepted external-enrichment starts per UTC day. Deterministic enrichment can consume the applicable guest/account start budget even if the plan later needs revision or a provider returns retryable `enrichment_unavailable`; it does not consume the successful-plan allowance unless a Trip is stored.
 
-## Identity and plan quota
+## Local stdio identity and plan quota
 
 Section 10 was approved on 2026-08-16. Every agent plan submission or generation call requires an authenticated server identity:
 
@@ -86,11 +91,13 @@ The complete Section 10 lifecycle passed against real local HTTP endpoints, the 
 
 This acceptance used the earlier backend-generation path and a test-only local WSGI harness with no Azure credentials or paid external call. The harness normalized the deterministic fallback draft to READY so the public-read and claim lifecycle could be exercised; production MCP behavior remained stricter and rejected draft plans.
 
-The hardened MCP local-first surface passes typecheck, build, and 109/109 tests, including 24-hour pending-write recovery, hidden UUID envelopes, exact single-POST behavior, structured revision results, stdio transport, child caps, and backend-AI gating. The backend passes 88/88 focused tests and 424/424 full planner tests, including validation-before-ledger behavior, quotas, throttling, fenced leases, receipt retention, URL safety, retryable provider outages, and unchanged website generation. Rebuilt-plugin end-to-end evidence for schema → host-authored plan → deterministic submit/revision → public share remains pending. The existing authentication, claim, quota, permission, and token-leak evidence remains applicable.
+On 2026-11-12, a freshly installed v0.1.8 plugin was copied into an isolated environment and exercised against the live local backend: it fetched the current Trip Plan v3 schema, received structured revision codes, submitted the repaired host-authored plan, and verified its saved plan through the public-read endpoint. The recorded local share hash is `ExA8xWfB`; evidence is in the Trips application's `.run-logs/installed-plugin-save-smoke.json`. This verifies the installed local profile's schema → revision → save → public-read path.
 
-## Configuration
+A separate real Codex app-server check discovered the installed local tools and fetched the live schema; its evidence is `.run-logs/codex-host-smoke.json` in the Trips application. Current v0.2.0 build, typecheck, HTTP transport, stdio and isolated-package checks pass. The new hosted OAuth journey in real ChatGPT, Claude, Codex and Claude Code accounts remains a separate acceptance check; current release evidence and outstanding host checks are recorded in [REMOTE.md](REMOTE.md).
 
-All variables are optional.
+## Local stdio configuration
+
+These local-profile variables are optional. Required hosted-service configuration is documented in [REMOTE.md](REMOTE.md).
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
@@ -157,7 +164,7 @@ Browser authorization is available at `/{locale}/cli/authorize?code=<user_code>`
 
 The repository is a marketplace source for both Codex and Claude Code. The plugin bundles its MCP server and runtime dependencies; installation does not execute `npx` or download an unpublished npm package.
 
-The guided onboarding page is [tripdremo.com/en/connect-ai](https://tripdremo.com/en/connect-ai). Its browser prompt is useful for drafting an itinerary, but it cannot connect an account or save a Tripdremo share link until this integration is installed.
+The guided onboarding page is [tripdremo.com/en/connect-ai](https://tripdremo.com/en/connect-ai). Its copied prompt requests setup through the [AI connection guide](https://tripdremo.com/ai/connect.txt): create or use the native MCP connection in the current AI host, complete Tripdremo browser sign-in, verify `tripdremo_auth_status` and `tripdremo_get_plan_schema`, then resume the original trip request. ChatGPT and Claude use their custom MCP connector controls; Codex and Claude Code can use the remote Git profile or direct remote configuration in [REMOTE.md](REMOTE.md). If setup needs a user action, identify that host's exact next step and preserve the request. A generic travel draft does not complete the connection request or a request for a saved share link.
 
 ### Codex
 

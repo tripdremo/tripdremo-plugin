@@ -12,6 +12,12 @@
       "source": "./plugins/tripdremo-claude",
       "description": "Plan real trips and return shareable Tripdremo itineraries.",
       "category": "productivity"
+    },
+    {
+      "name": "tripdremo-connect",
+      "source": "./plugins/tripdremo-connect-claude",
+      "description": "Connect your AI and save Tripdremo account itineraries.",
+      "category": "productivity"
     }
   ]
 }

@@ -4,8 +4,8 @@
 
 | Channel | Status | Install source |
 | --- | --- | --- |
-| Codex Git marketplace | Ready after the current commit is pushed | `tripdremo/tripdremo-plugin` |
-| Claude Code Git marketplace | Ready after the current commit is pushed | `tripdremo/tripdremo-plugin` |
+| Codex Git marketplace | Published | `tripdremo/tripdremo-plugin` |
+| Claude Code Git marketplace | Published | `tripdremo/tripdremo-plugin` |
 | OpenAI public plugin directory | Not submitted or approved | Requires OpenAI partner allowlisting for a public local-stdio plugin |
 | Claude plugin directory | Not submitted or approved | Requires an eligible paid Claude account and connected GitHub access |
 | Claude official marketplace | Not submitted or approved | Partner-managed publication path |

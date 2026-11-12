@@ -236,7 +236,7 @@ The explicit backend-AI skill is `/tripdremo-cloud` in Codex and `/tripdremo:tri
 For a session-only Claude smoke check, load the plugin directory directly:
 
 ```bash
-claude --plugin-dir /Users/dariuskasperavicius/www/private/tripdremo_ai/plugin
+claude --plugin-dir /Users/dariuskasperavicius/www/private/tripdremo_ai/plugin/dist/marketplace/plugins/tripdremo-claude
 ```
 
 The `--plugin-dir` command is a smoke fallback, not the marketplace-install acceptance check. If `plugin/dist/marketplace` is absent, marketplace installation remains pending; do not substitute an invented marketplace path or claim installation succeeded.

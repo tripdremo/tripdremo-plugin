@@ -99,10 +99,10 @@ async function validateManifests() {
     server?.command !== "node" ||
     !Array.isArray(server.args) ||
     server.args.length !== 1 ||
-    server.args[0] !== "./mcp/bin/tripdremo-mcp.mjs" ||
-    server.cwd !== "."
+    server.args[0] !== "${PLUGIN_ROOT}/mcp/bin/tripdremo-mcp.mjs" ||
+    server.cwd !== undefined
   ) {
-    throw new Error(".mcp.json must launch the bundled MCP with plugin-relative paths");
+    throw new Error(".mcp.json must launch the bundled MCP from the Codex plugin root");
   }
 }
 
@@ -229,6 +229,18 @@ async function assertClaudeCloudSkill(skillRoot) {
   }
 }
 
+async function writeClaudeMcpManifest(pluginPath) {
+  const manifestPath = path.join(pluginPath, ".mcp.json");
+  const manifest = await readJson(manifestPath);
+  const server = manifest.mcpServers?.tripdremo;
+  if (server?.command !== "node" || !Array.isArray(server.args) || server.args.length !== 1) {
+    throw new Error("Claude MCP manifest must contain the Tripdremo node launcher");
+  }
+  server.args = ["${CLAUDE_PLUGIN_ROOT}/mcp/bin/tripdremo-mcp.mjs"];
+  delete server.cwd;
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+}
+
 async function writeMarketplaces() {
   await rm(marketplaceRoot, { recursive: true, force: true });
   await mkdir(path.join(marketplaceRoot, ".agents", "plugins"), { recursive: true });
@@ -256,6 +268,7 @@ async function writeMarketplaces() {
   await injectClaudeCloudPolicy(
     path.join(claudeMarketplacePlugin, "skills", "tripdremo-cloud", "SKILL.md"),
   );
+  await writeClaudeMcpManifest(claudeMarketplacePlugin);
 
   await assertCodexCloudSkill(path.join(marketplacePlugin, "skills"), "Codex marketplace");
   await assertClaudeCloudSkill(path.join(claudeMarketplacePlugin, "skills"));

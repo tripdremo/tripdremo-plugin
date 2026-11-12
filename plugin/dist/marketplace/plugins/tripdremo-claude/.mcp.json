@@ -2,8 +2,9 @@
   "mcpServers": {
     "tripdremo": {
       "command": "node",
-      "args": ["./mcp/bin/tripdremo-mcp.mjs"],
-      "cwd": "."
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/bin/tripdremo-mcp.mjs"
+      ]
     }
   }
 }

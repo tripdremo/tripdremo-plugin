@@ -4,7 +4,8 @@
       "command": "node",
       "args": [
         "${CLAUDE_PLUGIN_ROOT}/mcp/bin/tripdremo-mcp.mjs"
-      ]
+      ],
+      "cwd": "${CLAUDE_PLUGIN_ROOT}"
     }
   }
 }

@@ -1,8 +1,11 @@
 {
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
     "tripdremo": {
+      "type": "stdio",
       "command": "node",
-      "args": ["${PLUGIN_ROOT}/mcp/bin/tripdremo-mcp.mjs"]
+      "args": ["${PLUGIN_ROOT}/mcp/bin/tripdremo-mcp.mjs"],
+      "cwd": "${PLUGIN_ROOT}"
     }
   }
 }

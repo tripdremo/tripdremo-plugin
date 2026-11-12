@@ -14,8 +14,8 @@ const env = Object.fromEntries(
 
 try {
   for (const host of [
-    { packageName: "tripdremo", rootToken: "${PLUGIN_ROOT}" },
-    { packageName: "tripdremo-claude", rootToken: "${CLAUDE_PLUGIN_ROOT}" },
+    { packageName: "tripdremo", rootToken: "${PLUGIN_ROOT}", type: "stdio" },
+    { packageName: "tripdremo-claude", rootToken: "${CLAUDE_PLUGIN_ROOT}", type: undefined },
   ]) {
     const packagedPlugin = path.join(isolatedRoot, host.packageName);
     await cp(
@@ -26,14 +26,15 @@ try {
     const manifest = JSON.parse(await readFile(path.join(packagedPlugin, ".mcp.json"), "utf8"));
     const server = manifest.mcpServers.tripdremo;
     assert.equal(server.command, "node");
-    assert.equal(server.cwd, undefined);
+    assert.equal(server.type, host.type);
+    assert.equal(server.cwd, host.rootToken);
     assert.deepEqual(server.args, [`${host.rootToken}/mcp/bin/tripdremo-mcp.mjs`]);
 
     const stderrChunks = [];
     const transport = new StdioClientTransport({
       command: process.execPath,
       args: server.args.map((argument) => argument.replace(host.rootToken, packagedPlugin)),
-      cwd: isolatedRoot,
+      cwd: server.cwd.replace(host.rootToken, packagedPlugin),
       env: { ...env, TRIPDREMO_LOG_LEVEL: "silent" },
       stderr: "pipe",
     });

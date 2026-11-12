@@ -1,7 +1,7 @@
-import { spawnSync } from "node:child_process";
 import { access, chmod, cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { build as buildWithEsbuild } from "esbuild";
 
 const pluginRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(pluginRoot, "..");
@@ -132,7 +132,20 @@ async function bundleMcp() {
 
   await rm(bundledMcp, { recursive: true, force: true });
   await mkdir(path.join(bundledMcp, "bin"), { recursive: true });
-  await cp(path.join(mcpSource, "dist"), path.join(bundledMcp, "dist"), { recursive: true });
+  await mkdir(path.join(bundledMcp, "dist"), { recursive: true });
+  const bundledEntry = path.join(bundledMcp, "dist", "index.js");
+  await buildWithEsbuild({
+    entryPoints: [path.join(mcpSource, "dist", "index.js")],
+    outfile: bundledEntry,
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    target: "node20",
+    minifyWhitespace: true,
+    logLevel: "silent",
+  });
+  const bundledSource = await readFile(bundledEntry, "utf8");
+  await writeFile(bundledEntry, bundledSource.replace(/[ \t]+$/gm, ""), "utf8");
   await cp(
     path.join(mcpSource, "bin", "tripdremo-mcp.mjs"),
     path.join(bundledMcp, "bin", "tripdremo-mcp.mjs"),
@@ -144,7 +157,6 @@ async function bundleMcp() {
     version: sourcePackage.version,
     private: true,
     type: "module",
-    dependencies: sourcePackage.dependencies,
   };
   await writeFile(
     path.join(bundledMcp, "package.json"),
@@ -152,14 +164,6 @@ async function bundleMcp() {
     "utf8",
   );
 
-  const install = spawnSync(
-    "npm",
-    ["install", "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund", "--package-lock=false"],
-    { cwd: bundledMcp, encoding: "utf8" },
-  );
-  if (install.status !== 0) {
-    throw new Error(`bundled MCP dependency install failed: ${install.stderr || install.stdout}`);
-  }
 }
 
 async function copySkills() {

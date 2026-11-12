@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { cp, mkdtemp, mkdir, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -13,15 +13,23 @@ if (!payloadPath) {
 
 const repositoryRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const payload = JSON.parse(await readFile(path.resolve(payloadPath), "utf8"));
-const configDir = await mkdtemp(path.join(os.tmpdir(), "tripdremo-plugin-smoke-"));
+const smokeRoot = await mkdtemp(path.join(os.tmpdir(), "tripdremo-plugin-smoke-"));
+const packagedPlugin = path.join(smokeRoot, "plugin");
+const configDir = path.join(smokeRoot, "config");
+await cp(
+  path.join(repositoryRoot, "plugin", "dist", "marketplace", "plugins", "tripdremo"),
+  packagedPlugin,
+  { recursive: true },
+);
+await mkdir(configDir);
 const stderrChunks = [];
 const env = Object.fromEntries(
   Object.entries(process.env).filter((entry) => entry[1] !== undefined),
 );
 const transport = new StdioClientTransport({
   command: process.execPath,
-  args: [path.join(repositoryRoot, "plugin", "mcp", "bin", "tripdremo-mcp.mjs")],
-  cwd: repositoryRoot,
+  args: [path.join(packagedPlugin, "mcp", "bin", "tripdremo-mcp.mjs")],
+  cwd: packagedPlugin,
   env: {
     ...env,
     TRIPDREMO_API_BASE_URL: "http://127.0.0.1:8000/api/v1",
@@ -91,7 +99,7 @@ try {
   }, null, 2)}\n`);
 } finally {
   await client.close();
-  await rm(configDir, { recursive: true, force: true });
+  await rm(smokeRoot, { recursive: true, force: true });
 }
 
 assert.equal(Buffer.concat(stderrChunks).toString("utf8"), "", "packaged MCP wrote to stderr");

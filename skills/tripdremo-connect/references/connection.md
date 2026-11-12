@@ -28,12 +28,21 @@ claude plugin marketplace add tripdremo/tripdremo-plugin --scope user
 claude plugin install tripdremo-connect@tripdremo --scope user
 ```
 
-Restart Claude Code, run `/mcp`, select Tripdremo Connect and authenticate through the browser. Verify `tripdremo_auth_status` and `tripdremo_get_plan_schema`, then invoke `/tripdremo-connect:tripdremo-connect` with the original trip request.
+Authenticate the installed plugin with its exact scoped server name in an interactive terminal:
+
+```bash
+claude mcp login 'plugin:tripdremo-connect:tripdremo-connect'
+```
+
+If the agent's terminal has no TTY, use `/mcp` in an interactive Claude Code session, select the Tripdremo Connect plugin server and choose Authenticate. `--no-browser` also needs an interactive terminal, so it does not solve a missing TTY. Complete browser sign-in, restart the host if required to discover the tools, and verify `tripdremo_auth_status` and `tripdremo_get_plan_schema`. Then invoke `/tripdremo-connect:tripdremo-connect` with the original trip request.
+
+MCP OAuth and Claude model sign-in are separate. If the account cannot start a Claude Code model session, report that eligibility blocker; successful MCP authentication alone does not establish that the native planning/save workflow passed.
 
 Direct CLI fallback when the marketplace is unavailable:
 
 ```bash
 claude mcp add --transport http --scope user tripdremo-connect https://mcp.tripdremo.com/mcp
+claude mcp login tripdremo-connect
 ```
 
-Then use `/mcp` to authenticate and verify the account. Do not configure both the plugin and direct server for the same endpoint. Neither path depends on an unpublished npm package or a generic `npx` launcher.
+This direct server uses the unprefixed `tripdremo-connect` name. Its login also requires an interactive terminal; use its Authenticate action in the interactive `/mcp` panel when the agent has no TTY. Verify the account and live schema after sign-in. Do not configure both the plugin and direct server for the same endpoint. Neither path depends on an unpublished npm package or a generic `npx` launcher.

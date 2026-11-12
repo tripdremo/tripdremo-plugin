@@ -1,6 +1,6 @@
 # Tripdremo agent surface
 
-Version 0.2.0 includes two separate profiles: `tripdremo` keeps the bundled local stdio/guest workflow; `tripdremo-connect` uses the hosted, browser-authenticated account connector. The hosted service and remote profile are prepared for release; real ChatGPT/Claude account acceptance remains pending. See [Hosted setup and release checks](REMOTE.md) for installation, OAuth, deployment and recovery.
+Version 0.2.1 corrects the Claude Code connector sign-in instructions and retains two separate profiles: `tripdremo` keeps the bundled local stdio/guest workflow; `tripdremo-connect` uses the hosted, browser-authenticated account connector. The hosted service has passed a native Codex OAuth and save check. Native save acceptance in ChatGPT, Claude Web and Claude Code remains pending; the 0.2.1 package update is prepared for publication. See [Hosted setup and release checks](REMOTE.md) for installation, OAuth, deployment and recovery.
 
 This repository packages Tripdremo for local CLI hosts and hosted MCP connections:
 
@@ -93,7 +93,7 @@ This acceptance used the earlier backend-generation path and a test-only local W
 
 On 2026-11-12, a freshly installed v0.1.8 plugin was copied into an isolated environment and exercised against the live local backend: it fetched the current Trip Plan v3 schema, received structured revision codes, submitted the repaired host-authored plan, and verified its saved plan through the public-read endpoint. The recorded local share hash is `ExA8xWfB`; evidence is in the Trips application's `.run-logs/installed-plugin-save-smoke.json`. This verifies the installed local profile's schema → revision → save → public-read path.
 
-A separate real Codex app-server check discovered the installed local tools and fetched the live schema; its evidence is `.run-logs/codex-host-smoke.json` in the Trips application. Current v0.2.0 build, typecheck, HTTP transport, stdio and isolated-package checks pass. The new hosted OAuth journey in real ChatGPT, Claude, Codex and Claude Code accounts remains a separate acceptance check; current release evidence and outstanding host checks are recorded in [REMOTE.md](REMOTE.md).
+A separate real Codex app-server check discovered the installed local tools and fetched the live schema; its evidence is `.run-logs/codex-host-smoke.json` in the Trips application. Current v0.2.1 build, typecheck, HTTP transport, stdio and isolated-package checks pass. The hosted native Codex OAuth and save flow also passed on 2026-11-12 with the 0.2.0 profile, producing share hash `FtaokzIJ`. Native save checks for ChatGPT, Claude Web and Claude Code remain pending; current release evidence and outstanding host checks are recorded in [REMOTE.md](REMOTE.md).
 
 ## Local stdio configuration
 
@@ -165,6 +165,8 @@ Browser authorization is available at `/{locale}/cli/authorize?code=<user_code>`
 The repository is a marketplace source for both Codex and Claude Code. The plugin bundles its MCP server and runtime dependencies; installation does not execute `npx` or download an unpublished npm package.
 
 The guided onboarding page is [tripdremo.com/en/connect-ai](https://tripdremo.com/en/connect-ai). Its copied prompt requests setup through the [AI connection guide](https://tripdremo.com/ai/connect.txt): create or use the native MCP connection in the current AI host, complete Tripdremo browser sign-in, verify `tripdremo_auth_status` and `tripdremo_get_plan_schema`, then resume the original trip request. ChatGPT and Claude use their custom MCP connector controls; Codex and Claude Code can use the remote Git profile or direct remote configuration in [REMOTE.md](REMOTE.md). If setup needs a user action, identify that host's exact next step and preserve the request. A generic travel draft does not complete the connection request or a request for a saved share link.
+
+For the remote Claude Code profile, authenticate from an interactive terminal with `claude mcp login 'plugin:tripdremo-connect:tripdremo-connect'`. If an agent's terminal has no TTY, use `/mcp` in an interactive Claude Code session and select the plugin's Authenticate action. A manually registered direct server instead uses `claude mcp login tripdremo-connect`. See [REMOTE.md](REMOTE.md) for setup and verification; the local stdio installation commands follow.
 
 ### Codex
 

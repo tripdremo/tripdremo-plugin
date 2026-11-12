@@ -1,25 +1,25 @@
 # Hosted Tripdremo Connect
 
-Version 0.2.0 adds an account-only Streamable HTTP MCP service and a separate `tripdremo-connect` Git marketplace profile. The existing `tripdremo` profile still launches the bundled stdio server and retains its local guest/device workflow.
+Version 0.2.1 corrects the Claude Code OAuth setup instructions for the account-only Streamable HTTP service and `tripdremo-connect` Git marketplace profile introduced in 0.2.0. The existing `tripdremo` profile still launches the bundled stdio server and retains its local guest/device workflow.
 
 The canonical endpoint is `https://mcp.tripdremo.com/mcp`. The OAuth issuer is `https://tripdremo.com`; it serves authorization-server metadata, registration, browser authorization, token exchange and revocation. MCP serves JSON protected-resource metadata at `/.well-known/oauth-protected-resource/mcp` and `/.well-known/oauth-protected-resource`. Unauthenticated MCP requests include a `WWW-Authenticate` metadata challenge.
 
 ## Release status
 
-The hosted code and packages are prepared for deployment. Local transport and packaging checks are separate from production acceptance. A public DNS response, a marketplace package, or a successful unauthenticated metadata request does not prove a real ChatGPT or Claude account can authorize and save a plan. Record completed host acceptance below before calling a host supported in production.
+The hosted service is deployed. The 0.2.1 package update is prepared for publication; its change is connector setup guidance and synchronized release metadata. Local transport and packaging checks are separate from production acceptance. A public DNS response, a marketplace package, or a successful unauthenticated metadata request does not prove a real ChatGPT or Claude account can authorize and save a plan. Record completed host acceptance below before calling a host supported in production.
 
 | Host acceptance | State |
 | --- | --- |
 | ChatGPT custom connector + OAuth + saved plan | Not yet verified on a real account |
 | Claude connector + OAuth + saved plan | Not yet verified on a real account |
-| Codex Git remote profile + OAuth + saved plan | Not yet verified against the hosted deployment |
+| Codex Git remote profile + OAuth + saved plan | Verified with the 0.2.0 profile on 2026-11-12; returned share hash `FtaokzIJ` |
 | Claude Code Git remote profile + OAuth + saved plan | Not yet verified against the hosted deployment |
 
 Provider-directory publication is tracked in [DISTRIBUTION.md](DISTRIBUTION.md). Installing from the Git marketplace is independent of provider-directory approval.
 
 ## Install and authorize
 
-After the endpoint is deployed, ChatGPT and Claude users with custom connector access can add `https://mcp.tripdremo.com/mcp`, select OAuth, sign in on Tripdremo and grant consent. Return to the chat, select the integration, and verify `tripdremo_auth_status` reports the intended account and `tripdremo_get_plan_schema` succeeds. Account eligibility and UI placement must be checked in the actual host; no directory listing or universal account availability is implied.
+ChatGPT and Claude users with custom connector access can add `https://mcp.tripdremo.com/mcp`, select OAuth, sign in on Tripdremo and grant consent. Return to the chat, select the integration, and verify `tripdremo_auth_status` reports the intended account and `tripdremo_get_plan_schema` succeeds. Account eligibility and UI placement must be checked in the actual host; no directory listing or universal account availability is implied.
 
 Codex Git marketplace:
 
@@ -35,7 +35,15 @@ claude plugin marketplace add tripdremo/tripdremo-plugin --scope user
 claude plugin install tripdremo-connect@tripdremo --scope user
 ```
 
-Restart the host if required to discover the installed tools, then use its OAuth connection action. Claude Code exposes it through `/mcp`. Verify the account and live schema before planning or writing. The remote skill is `tripdremo-connect` (Claude Code: `/tripdremo-connect:tripdremo-connect`). Install `tripdremo@tripdremo` instead to keep using the local stdio/guest profile.
+For the installed Claude Code plugin, run this from an interactive terminal:
+
+```bash
+claude mcp login 'plugin:tripdremo-connect:tripdremo-connect'
+```
+
+The plugin's scoped server name is required. If an agent's terminal has no TTY, use `/mcp` in an interactive Claude Code session, select the Tripdremo Connect plugin server and choose Authenticate. `--no-browser` still requires an interactive terminal; it is not a non-interactive workaround. Complete browser sign-in, then verify the account and live schema before planning or writing. Restart the host if needed to discover its tools. The remote skill is `tripdremo-connect` (Claude Code: `/tripdremo-connect:tripdremo-connect`). Install `tripdremo@tripdremo` instead to keep using the local stdio/guest profile.
+
+Tripdremo MCP OAuth is separate from Claude model sign-in and account eligibility. A completed connector login alone does not prove that Claude Code can run a model or complete an itinerary save; native save acceptance remains pending until exercised.
 
 If marketplace installation is unavailable, use a direct remote CLI configuration. Choose one installation method for each host:
 
@@ -46,9 +54,10 @@ codex mcp login tripdremo-connect --scopes trips:read,trips:write
 
 ```bash
 claude mcp add --transport http --scope user tripdremo-connect https://mcp.tripdremo.com/mcp
+claude mcp login tripdremo-connect
 ```
 
-For Claude Code, then use `/mcp` and complete browser authentication. These commands configure the endpoint; success still requires browser sign-in and a successful authentication-status tool call. No npm publication, `npx` package or manual token copying is involved. The server supplies workflow instructions at MCP initialization, including for direct installations.
+For the manually registered Claude Code server, use the unprefixed `tripdremo-connect` name shown above and an interactive terminal. If the agent has no TTY, use that server's Authenticate action in the interactive `/mcp` panel. Complete browser authentication and verify both `tripdremo_auth_status` and `tripdremo_get_plan_schema`. No npm publication, `npx` package or manual token copying is involved. The server supplies workflow instructions at MCP initialization, including for direct installations.
 
 ## Service deployment
 
@@ -83,4 +92,4 @@ Prepare reserves a backend UUID before submission. Retrying the same payload reu
 - HTTP tests cover metadata/discovery, Host/Origin rejection, two-user isolation, exact audience and numeric expiry, read/write scopes, revoked credentials, timeout recovery, UUID replay forwarding, revisions, account plan projection and hostile JSON inputs.
 - SDK 1.32.0 and Zod 4.6.6 are pinned to patched releases. Compatible transitive updates reduce `npm audit --omit=dev` to zero reported vulnerabilities. The SDK documents that its validation fix also requires explicit input bounds; this service enforces a 2 MiB body limit, 20,000 JSON elements and depth 64 before SDK validation. See the [SDK advisory](https://github.com/advisories/GHSA-46jr-4wx8-v453) and [Zod advisory](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5).
 - The repository marketplace and both generated Claude packages pass strict validation. Skill validation passes. The hosted runtime's dependency graph excludes local credential storage and the local API client.
-- No local container-build success is claimed. Container build/deployment and real provider-host acceptance are separate pending checks owned by the release coordinator.
+- No local container-build success is claimed. Deployment was performed separately by the release coordinator. Native Codex OAuth and save passed with the 0.2.0 profile; ChatGPT, Claude Web and Claude Code native save acceptance remain pending. Publishing and upgrading the 0.2.1 package is a separate release step.

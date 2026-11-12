@@ -1,6 +1,6 @@
 # Tripdremo plugin distribution
 
-Version 0.2.0 adds the separate `tripdremo-connect` remote profile. Its generated Git catalog entries are local release artifacts until pushed; production OAuth and real-host acceptance remain pending. See [REMOTE.md](REMOTE.md).
+Version 0.2.1 updates Claude Code connector setup guidance and synchronizes package versions for normal client upgrades. Its generated artifacts remain local until published. Native Codex OAuth and save passed with the 0.2.0 profile; other native save checks remain pending. See [REMOTE.md](REMOTE.md).
 
 ## Current channels
 

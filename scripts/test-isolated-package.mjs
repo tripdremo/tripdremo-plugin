@@ -18,8 +18,8 @@ try {
       packageName: "tripdremo",
       rootToken: null,
       type: "stdio",
-      command: "./mcp/bin/tripdremo-mcp.mjs",
-      args: [],
+      command: "node",
+      args: ["./mcp/bin/tripdremo-mcp.mjs"],
       cwd: ".",
     },
     {

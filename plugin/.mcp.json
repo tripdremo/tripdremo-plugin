@@ -3,9 +3,9 @@
   "mcpServers": {
     "tripdremo": {
       "type": "stdio",
-      "command": "node",
-      "args": ["${PLUGIN_ROOT}/mcp/bin/tripdremo-mcp.mjs"],
-      "cwd": "${PLUGIN_ROOT}"
+      "command": "./mcp/bin/tripdremo-mcp.mjs",
+      "args": [],
+      "cwd": "."
     }
   }
 }

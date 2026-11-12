@@ -98,11 +98,10 @@ async function validateManifests() {
   if (
     mcp.$schema !== "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json" ||
     server?.type !== "stdio" ||
-    server?.command !== "node" ||
+    server?.command !== "./mcp/bin/tripdremo-mcp.mjs" ||
     !Array.isArray(server.args) ||
-    server.args.length !== 1 ||
-    server.args[0] !== "${PLUGIN_ROOT}/mcp/bin/tripdremo-mcp.mjs" ||
-    server.cwd !== "${PLUGIN_ROOT}"
+    server.args.length !== 0 ||
+    server.cwd !== "."
   ) {
     throw new Error(".mcp.json must declare the portable Codex stdio launcher");
   }
@@ -235,11 +234,12 @@ async function writeClaudeMcpManifest(pluginPath) {
   const manifestPath = path.join(pluginPath, ".mcp.json");
   const manifest = await readJson(manifestPath);
   const server = manifest.mcpServers?.tripdremo;
-  if (server?.command !== "node" || !Array.isArray(server.args) || server.args.length !== 1) {
-    throw new Error("Claude MCP manifest must contain the Tripdremo node launcher");
+  if (server?.command !== "./mcp/bin/tripdremo-mcp.mjs" || !Array.isArray(server.args)) {
+    throw new Error("Claude MCP manifest must start from the canonical Tripdremo launcher");
   }
   delete manifest.$schema;
   delete server.type;
+  server.command = "node";
   server.args = ["${CLAUDE_PLUGIN_ROOT}/mcp/bin/tripdremo-mcp.mjs"];
   server.cwd = "${CLAUDE_PLUGIN_ROOT}";
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");

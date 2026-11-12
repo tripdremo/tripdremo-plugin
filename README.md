@@ -56,7 +56,7 @@ Public reads through `/share/<share_hash>/` remain anonymous. Backend account pl
 Run all commands from the repository root:
 
 ```bash
-cd /Users/dariuskasperavicius/www/private/tripdremo
+cd /Users/dariuskasperavicius/www/private/tripdremo_ai
 npm install
 npm run build
 npm test
@@ -64,6 +64,14 @@ npm run lint
 ```
 
 `npm run build` compiles the MCP server and builds the plugin bundle. The bundle includes the compiled MCP server under `plugin/mcp/`; it does not download `@tripdremo/mcp` with `npx` at runtime.
+
+With the Trips backend and frontend running locally, exercise the packaged MCP against a complete Trip Plan v3 submission:
+
+```bash
+npm run smoke:local -- /absolute/path/to/plan-submission.json
+```
+
+The smoke fetches the live schema, follows up to two structured revision responses, and verifies the resulting plan through the public share endpoint. It uses an isolated local development identity and temporary config directory.
 
 ### Verified Section 10 lifecycle
 
@@ -145,6 +153,50 @@ The backend exposes these identity routes under `/api/v1`:
 
 Browser authorization is available at `/{locale}/cli/authorize?code=<user_code>` for `en`, `lt`, `de`, and `pl`.
 
+## Install from the public marketplace
+
+The repository is a marketplace source for both Codex and Claude Code. The plugin bundles its MCP server and runtime dependencies; installation does not execute `npx` or download an unpublished npm package.
+
+The guided onboarding page is [tripdremo.com/en/connect-ai](https://tripdremo.com/en/connect-ai). Its browser prompt is useful for drafting an itinerary, but it cannot connect an account or save a Tripdremo share link until this integration is installed.
+
+### Codex
+
+```bash
+codex plugin marketplace add tripdremo/tripdremo-plugin
+codex plugin add tripdremo@tripdremo --json
+codex plugin list
+```
+
+Restart Codex after installation, then try:
+
+```text
+/tripdremo plan a relaxed 5-day trip to the Dolomites for two adults
+```
+
+### Claude Code
+
+```bash
+claude plugin marketplace add tripdremo/tripdremo-plugin --scope user
+claude plugin install tripdremo@tripdremo --scope user
+claude plugin list
+```
+
+Restart Claude Code after installation, then try:
+
+```text
+/tripdremo:tripdremo plan a relaxed 5-day trip to the Dolomites for two adults
+```
+
+The provider-directory submission state and release checklist are tracked in [DISTRIBUTION.md](DISTRIBUTION.md).
+
+## Privacy behavior
+
+- Planning uses the current request, the current chat, and private sources the user explicitly selects.
+- The agent asks before reading connected personal data and before saving an itinerary unless the user already asked to save it or create a Tripdremo link.
+- Passwords, API keys, one-time passwords, Supabase tokens, and Tripdremo CLI tokens never belong in chat. Account connection uses Tripdremo's browser authorization flow.
+- Saving creates a shareable Tripdremo link. The agent states this before submission.
+- The human-readable planning brief is available at [tripdremo.com/ai/trip-planning-brief.txt](https://tripdremo.com/ai/trip-planning-brief.txt).
+
 ## Local plugin installation
 
 The plugin build is expected to emit a local marketplace at `plugin/dist/marketplace` with the marketplace name `tripdremo-local`. After that directory exists, use these local verification commands.
@@ -152,7 +204,7 @@ The plugin build is expected to emit a local marketplace at `plugin/dist/marketp
 ### Codex
 
 ```bash
-codex plugin marketplace add /Users/dariuskasperavicius/www/private/tripdremo/plugin/dist/marketplace
+codex plugin marketplace add /Users/dariuskasperavicius/www/private/tripdremo_ai/plugin/dist/marketplace
 codex plugin add tripdremo@tripdremo-local --json
 codex plugin list
 ```
@@ -166,7 +218,7 @@ Start a new Codex thread after installation, then run:
 ### Claude Code
 
 ```bash
-claude plugin marketplace add /Users/dariuskasperavicius/www/private/tripdremo/plugin/dist/marketplace --scope local
+claude plugin marketplace add /Users/dariuskasperavicius/www/private/tripdremo_ai/plugin/dist/marketplace --scope local
 claude plugin install tripdremo@tripdremo-local --scope local
 claude plugin list
 ```
@@ -184,7 +236,7 @@ The explicit backend-AI skill is `/tripdremo-cloud` in Codex and `/tripdremo:tri
 For a session-only Claude smoke check, load the plugin directory directly:
 
 ```bash
-claude --plugin-dir /Users/dariuskasperavicius/www/private/tripdremo/plugin
+claude --plugin-dir /Users/dariuskasperavicius/www/private/tripdremo_ai/plugin
 ```
 
 The `--plugin-dir` command is a smoke fallback, not the marketplace-install acceptance check. If `plugin/dist/marketplace` is absent, marketplace installation remains pending; do not substitute an invented marketplace path or claim installation succeeded.

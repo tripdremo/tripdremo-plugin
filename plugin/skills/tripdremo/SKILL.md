@@ -26,13 +26,15 @@ Treat every other argument string as a planning request and preserve the entire 
 
 Read [references/request-building.md](references/request-building.md) before building arguments.
 
-1. Ask at most one question, and only when the destination is genuinely absent.
-2. Resolve dates, travelers, style, and budget; state only date assumptions.
-3. Call `tripdremo_get_plan_schema` and use the returned current Trip Plan v3 JSON Schema as the only plan-shape authority.
-4. Author the complete Trip Plan v3 JSON with the current host model. Perform all destination selection, itinerary reasoning, day design, pacing, and travel trade-offs locally in the host model. Keep every source and place map URL empty or absolute HTTPS on a public host.
-5. Call `tripdremo_submit_plan` with the original structured request and the authored plan. On the first request, this tool silently provisions the server-authenticated guest CLI identity; do not start browser login first.
-6. If the result is `needs_revision`, repair the returned plan locally using only its structured `issues`, then resubmit. Make at most two repair-and-resubmit attempts.
-7. If the result is `ready`, render the compact plan and share URL. If issues remain after two repairs, stop and report the remaining structured issues without claiming that a plan was saved.
+1. Use the current request, the current chat, and only the private sources the user explicitly selects. If connected personal data could materially improve the plan, name the source and ask before accessing it. Do not search past chats, memory, email, calendar, files, or other connectors by default.
+2. Ask at most one question, and only when the destination is genuinely absent.
+3. Resolve dates, travelers, style, and budget; state only date assumptions.
+4. Call `tripdremo_get_plan_schema` and use the returned current Trip Plan v3 JSON Schema as the only plan-shape authority.
+5. Author the complete Trip Plan v3 JSON with the current host model. Perform all destination selection, itinerary reasoning, day design, pacing, and travel trade-offs locally in the host model. Keep every source and place map URL empty or absolute HTTPS on a public host.
+6. Before `tripdremo_submit_plan`, explain that submission saves the itinerary to Tripdremo and creates a shareable link. Treat an explicit request to save the plan or create a Tripdremo link as consent; otherwise ask for confirmation and wait.
+7. Call `tripdremo_submit_plan` with the original structured request and the authored plan. On the first request, this tool silently provisions the server-authenticated guest CLI identity; do not start browser login first.
+8. If the result is `needs_revision`, repair the returned plan locally using only its structured `issues`, then resubmit. Make at most two repair-and-resubmit attempts.
+9. If the result is `ready`, render the compact plan and share URL. If issues remain after two repairs, stop and report the remaining structured issues without claiming that a plan was saved.
 
 If submission has a retryable ambiguous outcome or returns provider code `enrichment_unavailable`, keep the request and plan content unchanged and retry the same tool arguments. Do not count an unchanged recovery retry as a revision attempt. The MCP server keeps only hardened `0600` hashes and the hidden UUID for up to 24 hours so the retry reuses the same logical submission identity. Do not submit different content until the pending outcome resolves or expires.
 
@@ -53,6 +55,8 @@ Read [references/output.md](references/output.md) before rendering a plan.
 Read [references/auth.md](references/auth.md) before any login, logout, guest-ownership, or account claim action.
 
 Use the MCP login/session tools for this flow and never request a password, one-time password, Supabase token, or Tripdremo CLI token. Treat backend account listing, saving, editing, and commenting as account-only; a guest may create its one successful lifetime plan, read public shares, and see only locally recorded guest-plan references through the CLI.
+
+The installed Tripdremo integration can call its bundled MCP tools. A prompt copied from the Connect your AI webpage cannot install tools, connect accounts, or save a plan by itself; describe it as a planning prompt until the user installs the integration.
 
 ## Handle failures
 

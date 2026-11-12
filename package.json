@@ -12,6 +12,7 @@
   "scripts": {
     "build": "npm run build -w mcp && node plugin/scripts/build-plugin.mjs",
     "lint": "npm run typecheck -w mcp",
+    "smoke:local": "node scripts/smoke-local-plugin.mjs",
     "typecheck": "npm run typecheck -w mcp",
     "test": "npm run test -w mcp"
   },

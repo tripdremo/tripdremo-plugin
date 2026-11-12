@@ -12,9 +12,19 @@ const bundledSkills = path.join(pluginRoot, "skills");
 const marketplaceRoot = path.join(pluginRoot, "dist", "marketplace");
 const marketplacePlugin = path.join(marketplaceRoot, "plugins", "tripdremo");
 const claudeMarketplacePlugin = path.join(marketplaceRoot, "plugins", "tripdremo-claude");
+const publicCodexMarketplace = path.join(repositoryRoot, ".agents", "plugins", "marketplace.json");
+const publicClaudeMarketplace = path.join(repositoryRoot, ".claude-plugin", "marketplace.json");
 
 const generatedHeader =
   "# DO NOT EDIT: generated from commands/tripdremo.md by scripts/build-plugin.mjs.";
+
+function commandBody(markdown) {
+  const match = markdown.match(/^---\n[\s\S]*?\n---\n\n([\s\S]+)$/);
+  if (!match) {
+    throw new Error("commands/tripdremo.md must contain YAML frontmatter and a command body");
+  }
+  return match[1];
+}
 
 async function readJson(file) {
   return JSON.parse(await readFile(file, "utf8"));
@@ -108,7 +118,7 @@ async function generateCodexCommand() {
     throw new Error('commands/tripdremo.md cannot contain a TOML triple-quote delimiter');
   }
 
-  const prompt = markdown.replace("$ARGUMENTS", "{{args}}").trimEnd();
+  const prompt = commandBody(markdown).replace("$ARGUMENTS", "{{args}}").trimEnd();
   const generated = `${generatedHeader}\n` +
     'description = "Plan trips and manage Tripdremo sessions."\n' +
     `prompt = """\n${prompt}\n"""\n`;
@@ -280,12 +290,46 @@ async function writeMarketplaces() {
     path.join(marketplaceRoot, ".claude-plugin", "marketplace.json"),
     `${JSON.stringify(claudeMarketplace, null, 2)}\n`,
   );
+
+  const publicCodex = {
+    name: "tripdremo",
+    interface: { displayName: "Tripdremo" },
+    plugins: [
+      {
+        name: "tripdremo",
+        source: {
+          source: "local",
+          path: "./plugin/dist/marketplace/plugins/tripdremo",
+        },
+        policy: { installation: "AVAILABLE", authentication: "ON_INSTALL" },
+        category: "Productivity",
+      },
+    ],
+  };
+  const publicClaude = {
+    $schema: "https://anthropic.com/claude-code/marketplace.schema.json",
+    name: "tripdremo",
+    description: "Tripdremo agent plugin marketplace.",
+    owner: { name: "Tripdremo", url: "https://tripdremo.com" },
+    plugins: [
+      {
+        name: "tripdremo",
+        source: "./plugin/dist/marketplace/plugins/tripdremo-claude",
+        description: "Plan real trips and return shareable Tripdremo itineraries.",
+        category: "productivity",
+      },
+    ],
+  };
+  await mkdir(path.dirname(publicCodexMarketplace), { recursive: true });
+  await mkdir(path.dirname(publicClaudeMarketplace), { recursive: true });
+  await writeFile(publicCodexMarketplace, `${JSON.stringify(publicCodex, null, 2)}\n`, "utf8");
+  await writeFile(publicClaudeMarketplace, `${JSON.stringify(publicClaude, null, 2)}\n`, "utf8");
 }
 
 async function assertGeneratedCommand() {
   const markdown = await readFile(path.join(pluginRoot, "commands", "tripdremo.md"), "utf8");
   const toml = await readFile(path.join(pluginRoot, "commands", "tripdremo.toml"), "utf8");
-  const expectedPrompt = markdown.replace("$ARGUMENTS", "{{args}}").trimEnd();
+  const expectedPrompt = commandBody(markdown).replace("$ARGUMENTS", "{{args}}").trimEnd();
   if (!toml.startsWith(generatedHeader) || !toml.includes(expectedPrompt)) {
     throw new Error("generated Codex command is out of sync with its Markdown source");
   }

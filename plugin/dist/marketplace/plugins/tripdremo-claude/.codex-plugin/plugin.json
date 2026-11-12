@@ -1,12 +1,12 @@
 {
   "name": "tripdremo",
-  "version": "0.1.2+codex.20260817190305",
+  "version": "0.1.3",
   "description": "Plan real trips with Tripdremo and get a shareable itinerary link, straight from the CLI.",
   "author": {
     "name": "Tripdremo",
     "url": "https://tripdremo.com"
   },
-  "homepage": "https://tripdremo.com",
+  "homepage": "https://tripdremo.com/en/connect-ai",
   "license": "Proprietary",
   "keywords": [
     "travel",
@@ -27,7 +27,7 @@
       "Read",
       "Write"
     ],
-    "websiteURL": "https://tripdremo.com",
+    "websiteURL": "https://tripdremo.com/en/connect-ai",
     "defaultPrompt": [
       "Plan a 5-day trip to the Dolomites in July for 2 adults and a 6-year-old",
       "Plan a relaxed week in northern Portugal by camper",

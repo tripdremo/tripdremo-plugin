@@ -1,0 +1,20 @@
+{
+  "name": "tripdremo",
+  "interface": {
+    "displayName": "Tripdremo"
+  },
+  "plugins": [
+    {
+      "name": "tripdremo",
+      "source": {
+        "source": "local",
+        "path": "./plugin/dist/marketplace/plugins/tripdremo"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
